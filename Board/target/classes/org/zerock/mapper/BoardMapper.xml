@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.zerock.mapper.BoardMapper">
+
+	<!--  Dynamic SQL for Search. -->
+	<sql id="criteria">
+		<trim prefixOverrides="OR" prefix="(" suffix=") and" > 
+			<foreach collection="typeArray" item="type">
+				<trim prefix="OR">
+					<choose>
+						<when test='type=="T"'>
+							<![CDATA[title LIKE '%'||#{keyword}||'%']]> 
+						</when>
+						<when test='type=="C"'>
+							<![CDATA[content LIKE '%'||#{keyword}||'%']]> 
+						</when>
+						<when test='type=="W"'>
+							<![CDATA[writer LIKE '%'||#{keyword}||'%']]> 
+						</when>
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+	
+	<select id="getList" resultType="org.zerock.domain.BoardVO">
+		<![CDATA[SELECT B.rn, B.bno, B.title, B.content, B.writer, B.regdate, B.updatedate, B.ip, B.views, B.likes, NVL(R.replyCount, 0) AS replyCount 
+					FROM (SELECT /*+ INDEX_DESC(TBL_BOARD PK_BOARD) */ ROWNUM AS rn, bno, title, content, writer, regdate, updatedate, ip, views, likes 
+        						FROM TBL_BOARD WHERE]]> 
+        						<include refid="criteria"></include>
+        						<![CDATA[ROWNUM <= #{pageNum} * #{amount}) B LEFT JOIN (SELECT bno, count(rno) AS replyCount FROM tbl_reply GROUP BY bno) R ON B.bno = R.bno WHERE rn > (#{pageNum} - 1) * #{amount}]]>
+	</select>
+	
+	<select id="read" parameterType="long" resultType="org.zerock.domain.BoardVO">
+		<![CDATA[SELECT * FROM tbl_board WHERE bno > 0 AND bno = #{bno}]]>
+	</select>
+	
+	<!-- Deprecated. -->
+	<insert id="insert" parameterType="org.zerock.domain.BoardVO">
+		<![CDATA[INSERT INTO tbl_board (bno, title, content, writer, ip)
+		VALUES (seq_board.nextval, #{title}, #{content}, #{writer}, #{ip})]]>
+	</insert>
+	
+	<insert id="insertSelectKey" parameterType="org.zerock.domain.BoardVO">
+		<selectKey keyProperty="bno" order="BEFORE" resultType="long">
+			<![CDATA[SELECT seq_board.nextval FROM dual]]>
+		</selectKey>
+	
+		<![CDATA[INSERT INTO tbl_board (bno, title, content, writer, ip, password)
+		VALUES (#{bno}, #{title}, #{content}, #{writer}, #{ip}, #{password})]]>
+	</insert>
+	
+	<update id="update" parameterType="org.zerock.domain.BoardVO">
+		<![CDATA[UPDATE tbl_board SET title = #{title}, content = #{content}, updatedate = sysdate WHERE bno = #{bno}]]>
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		<![CDATA[DELETE FROM tbl_board WHERE bno > 0 AND bno = #{bno}]]>
+	</delete>
+	
+	<!-- Count boards of All days or Search results -->
+	<select id="count" resultType="_long">
+		<![CDATA[SELECT count(*) FROM tbl_board WHERE]]>
+			<include refid="criteria"></include>
+		<![CDATA[bno > 0]]>
+	</select>
+	
+	<select id="lastBoard" resultType="org.zerock.domain.BoardVO">
+		<![CDATA[SELECT * FROM tbl_board WHERE bno=(SELECT max(bno) FROM tbl_board)]]>
+	</select>
+	
+	<select id="rank" parameterType="_int" resultType="org.zerock.domain.RankVO">
+		<![CDATA[SELECT * FROM (SELECT count(*) as count, writer FROM tbl_board GROUP BY writer ORDER BY count DESC) WHERE rownum <= #{limit}]]>
+	</select>
+	
+	<select id="getToday" resultType="org.zerock.domain.BoardVO">
+		<![CDATA[SELECT rn, bno, title, content, writer, regdate, updatedate, ip, views, likes 
+					FROM (SELECT /*+ INDEX_DESC(TBL_BOARD PK_BOARD) */ ROWNUM AS rn, bno, title, content, writer, regdate, updatedate, ip, views, likes 
+        						FROM TBL_BOARD WHERE to_char(regdate, 'yyyy-MM-dd') = to_char(sysdate, 'yyyy-MM-dd') AND ROWNUM <= #{pageNum} * #{amount})
+					WHERE rn > (#{pageNum} - 1) * #{amount}]]>
+	</select>
+	
+	<select id="getTodayCount" resultType="_long">
+		<![CDATA[SELECT /*+ INDEX_DESC(TBL_BOARD PK_BOARD) */ COUNT(bno) FROM tbl_board WHERE to_char(regdate, 'yyyy-MM-dd') = to_char(sysdate, 'yyyy-MM-dd')]]>
+	</select>
+	
+	<insert id="countAcc">
+		<![CDATA[DECLARE v_count NUMBER;
+			BEGIN
+    			EXECUTE IMMEDIATE 'SELECT COUNT(*) FROM tbl_acc_log WHERE TO_CHAR(accdate, ''yyyy-MM-dd'') = TO_CHAR(SYSDATE, ''yyyy-MM-dd'')' INTO v_count;
+    			IF v_count = 0 THEN
+        				INSERT INTO tbl_acc_log(ano, accdate, acccount) VALUES (seq_acc.NEXTVAL, SYSDATE, 1);
+    			ELSE
+        				UPDATE tbl_acc_log SET acccount = acccount + 1 WHERE TO_CHAR(accdate, 'yyyy-MM-dd') = TO_CHAR(SYSDATE, 'yyyy-MM-dd');
+    			END IF;
+			END;]]>
+	</insert>
+	
+	<update id="updateViews" parameterType="_long">
+		<![CDATA[UPDATE tbl_board SET views = views + 1 WHERE bno = #{bno}]]>
+	</update>
+	
+	<update id="addLikes" parameterType="_long">
+		<![CDATA[UPDATE tbl_board SET likes = likes + 1 WHERE bno = #{bno}]]>
+	</update>
+	
+	<select id="verifyModify" resultType="org.zerock.domain.BoardVO">
+		<![CDATA[SELECT /*+ INDEX_DESC(TBL_BOARD PK_BOARD) */ bno, title, content, writer, regdate, updatedate, ip, views, likes FROM tbl_board WHERE bno = #{bno} AND password = #{password}]]>
+	</select>
+	
+</mapper>
