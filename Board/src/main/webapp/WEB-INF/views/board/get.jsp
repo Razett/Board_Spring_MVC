@@ -316,6 +316,7 @@ $(document).ready(function () {
         		input_reply_content.val("");
         		input_replyer.val("");
         		input_reply_password.val("");
+        		$('#collapseCardExample').removeClass('show');
         });
     });
 
