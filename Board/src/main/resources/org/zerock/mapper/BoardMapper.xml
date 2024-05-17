@@ -76,9 +76,10 @@
 	</select>
 	
 	<select id="getToday" resultType="org.zerock.domain.BoardVO">
-		<![CDATA[SELECT rn, bno, title, content, writer, regdate, updatedate, ip, views, likes 
+		<![CDATA[SELECT B.rn, B.bno, B.title, B.content, B.writer, B.regdate, B.updatedate, B.ip, B.views, B.likes, NVL(R.replyCount, 0) AS replyCount 
 					FROM (SELECT /*+ INDEX_DESC(TBL_BOARD PK_BOARD) */ ROWNUM AS rn, bno, title, content, writer, regdate, updatedate, ip, views, likes 
-        						FROM TBL_BOARD WHERE to_char(regdate, 'yyyy-MM-dd') = to_char(sysdate, 'yyyy-MM-dd') AND ROWNUM <= #{pageNum} * #{amount})
+        						FROM TBL_BOARD WHERE to_char(regdate, 'yyyy-MM-dd') = to_char(sysdate, 'yyyy-MM-dd') AND ROWNUM <= #{pageNum} * #{amount}) B 
+        						LEFT JOIN (SELECT bno, count(rno) AS replyCount FROM tbl_reply GROUP BY bno) R ON B.bno = R.bno 
 					WHERE rn > (#{pageNum} - 1) * #{amount}]]>
 	</select>
 	
