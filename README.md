@@ -3,7 +3,7 @@ Spring 레거시 MVC 프로젝트 기반 게시판
 
 Bootstrap SB admin 2
 
-Oracle XE 11g, Maven 프로젝트, Mybatis, HicariCP, Gson 등
+Oracle XE 11g, Maven 프로젝트, Mybatis, HikariCP, Gson 등
 게시물 CRUD, 댓글(REST) CRUD 구현
 
 ![image](https://github.com/Razett/Board_Spring_MVC/assets/8415687/2ebdc0ac-396a-4cf9-a0dd-21082a3a590b)
