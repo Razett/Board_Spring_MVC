@@ -9,6 +9,7 @@ Oracle XE 11g, Maven 프로젝트, Mybatis, HicariCP, Gson 등
 ![image](https://github.com/Razett/Board_Spring_MVC/assets/8415687/2ebdc0ac-396a-4cf9-a0dd-21082a3a590b)
 ![image](https://github.com/Razett/Board_Spring_MVC/assets/8415687/b9acf5a5-860a-4d4e-852e-569bce0c6d06)
 ![image](https://github.com/Razett/Board_Spring_MVC/assets/8415687/037888a6-975f-49f6-a077-c81e0fb3a9d8)
+![image](https://github.com/Razett/Board_Spring_MVC/assets/8415687/85ee0586-a243-4fba-a6ed-a3b516cdaffb)
 ![image](https://github.com/Razett/Board_Spring_MVC/assets/8415687/9612a185-1ff4-46e1-bb39-85304e356441)
 ![image](https://github.com/Razett/Board_Spring_MVC/assets/8415687/73b74351-7c74-4a9d-8bf7-64d2df0f39ae)
 ![image](https://github.com/Razett/Board_Spring_MVC/assets/8415687/0943473a-bf0b-41ae-b543-378aeca51ce6)
